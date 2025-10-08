@@ -1,7 +1,7 @@
 /*
 Drawing an animated orb  using noise and triangles...
 -----------------------------------------------------------
-The sketch draws a orb witha surface that deforms using
+The sketch draws a orb with a surface that deforms using
 Perlin noise, which createsan organic and "wobbly" effect.
 The orb rotates on the Y-axis, and the vertices are
 displaced over time
@@ -19,11 +19,23 @@ let noiseOffset = 0;
 let noiseScale = 0.9;
 let noiseStrength = 40;
 let noiseSpeed = 0.5;
-let noiseRotation = 0.002;
+let noiseRotation = 0.002; // Rotation speed
 
 let rotationX = -0.4;
 let rotationY = 0.4;
 let cameraDistance = 100;
+
+// Color palette and current color state
+let colors = [
+  [255, 100, 100],
+  [100, 255, 200],
+  [200, 150, 255],
+  [255, 220, 120],
+  [120, 220, 255],
+  [255, 160, 220],
+];
+let currentColorIndex = 0;
+let currentColor = colors[currentColorIndex];
 
 function setup() {
   createCanvas(innerWidth, innerHeight, WEBGL); // 3D Graphics
@@ -66,11 +78,16 @@ function buildOrb() {
 function draw() {
   background(10, 15, 20);
   noStroke();
-  translate(0, 0, cameraDistance);
+
+  // Floating effect
+  let floatY = sin(millis() * 0.002) * 10; // 10 pixels = speed
+  translate(0, floatY, cameraDistance);
 
   // Automatic rotation of the orb
   rotateY((rotationY += noiseRotation));
   rotateX(rotationX);
+
+  fill(currentColor);
 
   beginShape(TRIANGLES);
   let t = millis() * 0.001 * noiseSpeed;
@@ -92,53 +109,8 @@ function draw() {
   endShape();
 }
 
-const selectedElement = document.getElementById("selected");
-const sineButton = document.getElementById("sine");
-const squareButton = document.getElementById("square");
-const sawButton = document.getElementById("sawtooth");
-const triangleButton = document.getElementById("triangle");
-const startButton = document.getElementById("start");
-const stopButton = document.getElementById("stop");
-const slider = document.getElementById("frequency");
-let oscillator;
-
-window.addEventListener("load", () => {
-  oscillator = new Tone.Oscillator(440, "sine").toDestination();
-oscillator.frequency.value = slider.value;
-});
-
-sineButton.addEventListener("click", () => {
-  oscillator.type = "sine";
-  selectedElement.innerText = "Selected: Sine";
-});
-
-squareButton.addEventListener("click", () => {
-  oscillator.type = "square";
-  selectedElement.innerText = "Selected: Square";
-});
-
-sawButton.addEventListener("click", () => {
-  oscillator.type = "sawtooth";
-  selectedElement.innerText = "Selected: SawTooth";
-});
-
-triangleButton.addEventListener("click", () => {
-  oscillator.type = "triangle";
-  selectedElement.innerText = "Selected: Triangle";
-});
-
-slider.addEventListener("input", () => {
-  oscillator.frequency.value = slider.value;
-});
-
-startButton.addEventListener("click", () => {
-  oscillator.start();
-});
-
-stopButton.addEventListener("click", () => {
-  oscillator.stop();
-});
-
-window.addEventListener("click", () => {
-  Tone.start();
-});
+// Change the color of the orb on mouse click
+function mousePressed() {
+  currentColorIndex = (currentColorIndex + 1) % colors.length;
+  currentColor = colors[currentColorIndex];
+}
