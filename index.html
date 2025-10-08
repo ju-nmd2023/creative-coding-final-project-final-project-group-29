@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Sketch</title>
+    <script src="http://unpkg.com/tone" defer></script>
 
     <link rel="stylesheet" type="text/css" href="style.css" />
 
@@ -13,5 +14,17 @@
     <script src="sketch.js"></script>
   </head>
 
-  <body></body>
+  <body>
+    <h1>Oscillators</h1>
+    <p id="selected">Selected: Sine</p>
+    <button id="sine">Sine</button>
+    <button id="square">Square</button>
+    <button id="sawtooth">SawTooth</button>
+    <button id="triangle">Triangle</button>
+    <hr />
+    <input type="range" id="frequency" min="16" max="8000" />
+    <hr />
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+  </body>
 </html>
