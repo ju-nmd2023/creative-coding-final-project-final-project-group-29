@@ -37,6 +37,17 @@ let colors = [
 let currentColorIndex = 0;
 let currentColor = colors[currentColorIndex];
 
+// Mic audio (Tone.js)
+let audioOn = false;
+let mic, meter;
+let audioLevel = 0;
+let _lastAudioUpdate = 0;
+const _audioUpdateMs = 33;
+const _baseNoiseStrength = noiseStrength;
+const _baseRadius = radius;
+const _baseNoiseSpeed = noiseSpeed;
+const _baseNoiseRotation = noiseRotation;
+
 function setup() {
   createCanvas(innerWidth, innerHeight, WEBGL); // 3D Graphics
   buildOrb();
@@ -75,9 +86,29 @@ function buildOrb() {
   }
 }
 
+// Inspiration from this code: https://editor.p5js.org/ErikBorge/sketches/mjsEZbDYI
 function draw() {
   background(10, 15, 20);
   noStroke();
+
+  // Mic-driven warping
+  if (audioOn && meter && millis() - _lastAudioUpdate > _audioUpdateMs) {
+    _lastAudioUpdate = millis();
+    let lvl = meter.getValue();
+    lvl = constrain(lvl, 0, 1);
+    audioLevel = lerp(audioLevel, lvl, 0.25);
+  }
+
+  // Map level to orb parameters
+  const _warpStrength = _baseNoiseStrength + audioLevel * 110; // higher = more
+  const _radiusBoost = audioLevel * 35; // slight puffing
+  const _speedBoost = audioLevel * 0.9; // faster surface motion
+  const _rotBoost = audioLevel * 0.02; // a bit more spin
+
+  noiseStrength = _warpStrength;
+  radius = _baseRadius + _radiusBoost;
+  noiseSpeed = _baseNoiseSpeed + _speedBoost;
+  noiseRotation = _baseNoiseRotation + _rotBoost;
 
   // Floating effect
   let floatY = sin(millis() * 0.002) * 10; // 10 pixels = speed
@@ -113,4 +144,26 @@ function draw() {
 function mousePressed() {
   currentColorIndex = (currentColorIndex + 1) % colors.length;
   currentColor = colors[currentColorIndex];
+
+  // Start microphone
+  if (!audioOn && typeof Tone !== "undefined") {
+    Tone.start()
+      .then(() => {
+        mic = new Tone.UserMedia();
+        return mic.open();
+      })
+      .then(() => {
+        meter = new Tone.Meter({
+          channels: 1,
+          normalRange: true,
+          smoothing: 0.8,
+        });
+        mic.connect(meter);
+        audioOn = true;
+        console.log("Microphone started");
+      })
+      .catch((e) => {
+        console.error("Could not start microphone:", e);
+      });
+  }
 }
