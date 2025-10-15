@@ -7,6 +7,14 @@ The orb rotates on the Y-axis, and the vertices are
 displaced over time
 */
 
+//Flow field background
+let flowFieldCols, flowFieldRows;
+let flowFieldScale = 30;
+let flowFieldZoff = 0;
+let flowFieldInc = 0.05;
+let flowFieldParticles = [];
+let flowFieldAlpha = 25; //Transparency
+
 // Building the orb itself using x and y
 let orbX = 40; // Horizontal building blocks
 let orbY = 60; // Vertical building blocks
