@@ -76,11 +76,12 @@ class ShootingStar {
     dir.setMag(random(starSpeedMin, starSpeedMax));
     this.vel = dir;
     this.prevPos = this.pos.copy();
+    // use current orb color
     this.color = color(
-      random(180, 255),
-      random(180, 255),
-      random(200, 255),
-      random(120, 200)
+      currentColor[0],
+      currentColor[1],
+      currentColor[2],
+      random(150, 220)
     );
     this.life = random(250, 500);
   }
@@ -231,6 +232,16 @@ function draw() {
 function mousePressed() {
   currentColorIndex = (currentColorIndex + 1) % colors.length;
   currentColor = colors[currentColorIndex];
+
+  // update all stars to match new orb color
+  for (let s of stars) {
+    s.color = color(
+      currentColor[0],
+      currentColor[1],
+      currentColor[2],
+      random(150, 220)
+    );
+  }
 
   if (!audioOn && typeof Tone !== "undefined") {
     Tone.start()
