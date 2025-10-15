@@ -56,6 +56,54 @@ const _baseRadius = radius;
 const _baseNoiseSpeed = noiseSpeed;
 const _baseNoiseRotation = noiseRotation;
 
+//Creation of particle class
+class FlowParticle {
+  constructor(){
+    this.pos = createVector(random(width), random(height));
+    this.vel = createVector(0, 0);
+    this.acc = createVector(0, 0);
+    this.maxSpeed = 2;
+    this.prevPos = this.pos.copy();
+  }
+
+  follow(vectors, cols) {
+    let x = floor(this.pos.x / flowFieldScale);
+    let y = floor(this.pos.y / flowFieldScale);
+    let index = x + y * cols;
+    let force = vectors[index];
+    if (force) this.applyForce(force);
+  }
+
+  applyForce(force) {
+    this.acc.add(force);
+  }
+
+  update(){
+    this.vel.add(this.acc);
+    this.vel.limit(this.maxSpeed);
+    this.pos.add(this.vel);
+    this.acc.mult(0);
+  }
+
+  edges() {
+    if (this.pos.x > width) { this.pos.x = 0; this.prevPos = this.pos.copy(); }
+    if (this.pos.x < 0) { this.pos.x = width; this.prevPos = this.pos.copy(); }
+    if (this.pos.y > height) { this.pos.y = 0; this.prevPos = this.pos.copy(); }
+    if (this.pos.y < 0) { this.pos.y = height; this.prevPos = this.pos.copy(); }
+  }
+
+  show() {
+    stroke(120, 180, 255, flowFieldAlpha);
+    line(this.prevPos.x, this.prevPos.y, this.pos.x, this.pos.y);
+    this.updatePrev();
+  }
+
+  updatePrev() {
+    this.prevPos.x = this.pos.x;
+    this.prevPos.y = this.pos.y;
+  }
+}
+
 function setup() {
   createCanvas(innerWidth, innerHeight, WEBGL); // 3D Graphics
   buildOrb();
