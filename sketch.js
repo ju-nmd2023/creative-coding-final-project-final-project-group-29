@@ -21,12 +21,12 @@ let radius = 160;
 let vertices = []; // 3D points for the orb
 let indices = []; // Storing the triangles
 
-// Creating a unique noise pattern
+// Creating a Smooth noise pattern
 let noiseOffset = 0;
-let noiseScale = 0.9;
-let noiseStrength = 40;
-let noiseSpeed = 0.5;
-let noiseRotation = 0.002; // Rotation speed
+let noiseScale = 0.7;      
+let noiseStrength = 30;    
+let noiseSpeed = 0.3;     
+let noiseRotation = 0.0015;
 
 let rotationX = -0.4;
 let rotationY = 0.4;
@@ -72,18 +72,18 @@ class ShootingStar {
     this.reset();
   }
 
+  // Spawns flowfield particles along the screen edges
   reset() {
-    // spawn along screen edges
     let side = floor(random(4));
     let x, y;
-    if (side === 0) { x = random(width); y = -20; } // top
-    else if (side === 1) { x = width + 20; y = random(height); } // right
-    else if (side === 2) { x = random(width); y = height + 20; } // bottom
-    else { x = -20; y = random(height); } // left
+    if (side === 0) { x = random(width); y = -20; }
+    else if (side === 1) { x = width + 20; y = random(height); }
+    else if (side === 2) { x = random(width); y = height + 20; }
+    else { x = -20; y = random(height); }
 
     this.pos = createVector(x, y);
 
-    // random direction toward center-ish
+    // Random direction toward center-ish
     let dir = p5.Vector.sub(createVector(width / 2, height / 2), this.pos);
     dir.rotate(random(-PI / 3, PI / 3));
     dir.setMag(random(starSpeedMin, starSpeedMax));
@@ -108,18 +108,18 @@ class ShootingStar {
     let orbScreen = createVector(width / 2, height / 2);
     let dir = p5.Vector.sub(orbScreen, this.pos);
     let d = dir.mag();
-    if (d < 300) { // influence range
+    if (d < 300) { 
       dir.normalize();
       let forceMag = gravityStrength / (d * d + 1000);
       let pull = dir.mult(forceMag);
       this.vel.add(pull);
-      this.vel.limit(4); // prevent extreme bending
+      this.vel.limit(4);
     }
 
     this.pos.add(this.vel);
     this.life--;
 
-    // reset if offscreen or expired
+    // Reset if offscreen or expired
     if (
       this.pos.x < -100 || this.pos.x > width + 100 ||
       this.pos.y < -100 || this.pos.y > height + 100 ||
@@ -146,7 +146,7 @@ function setup() {
   backGroundLayer = createGraphics(innerWidth, innerHeight);
   for (let i = 0; i < starCount; i++) stars.push(new ShootingStar());
 
-  // === Audio setup (Tone.js players for tracks) ===
+  //Audio setup (Tone.js players for tracks)
   if (typeof Tone !== "undefined") {
     for (let i = 0; i < trackFiles.length; i++) {
       let player = new Tone.Player(trackFiles[i]).toDestination();
@@ -232,7 +232,7 @@ function windowResized() {
   resizeCanvas(innerWidth, innerHeight);
   backGroundLayer.resizeCanvas(innerWidth, innerHeight);
 
-  // reposition buttons after resize
+  // Reposition buttons after resize
   for (let i = 0; i < trackButtons.length; i++) {
     trackButtons[i].position(20, height - 40 * (trackButtons.length - i));
   }
@@ -304,8 +304,10 @@ function draw() {
   noiseSpeed = _baseNoiseSpeed + _speedBoost;
   noiseRotation = _baseNoiseRotation + _rotBoost;
 
-  // Floating effect
+  // Floating + bouncing effect
   let floatY = sin(millis() * 0.002) * 10; // 10 pixels = speed
+  let bounce = sin(millis() * 0.003) * 6;  // smooth pulsating bounce
+  radius += bounce;
   translate(0, floatY, cameraDistance);
 
   // Automatic rotation of the orb
