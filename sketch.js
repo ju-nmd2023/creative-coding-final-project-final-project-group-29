@@ -24,7 +24,7 @@ let indices = []; // Storing the triangles
 // Creating a Smooth noise pattern
 let noiseOffset = 0;
 let noiseScale = 0.7;      
-let noiseStrength = 30;    
+let noiseStrength = 10;    
 let noiseSpeed = 0.3;     
 let noiseRotation = 0.0015;
 
