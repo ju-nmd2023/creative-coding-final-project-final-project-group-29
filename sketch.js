@@ -44,7 +44,7 @@ let colors = [
 let currentColorIndex = 0;
 let currentColor = colors[currentColorIndex];
 
-// Mic audio (Tone.js)
+// Mic and audio (Tone.js)
 let audioOn = false;
 let mic, meter;
 let audioLevel = 0;
@@ -54,6 +54,17 @@ const _baseNoiseStrength = noiseStrength;
 const _baseRadius = radius;
 const _baseNoiseSpeed = noiseSpeed;
 const _baseNoiseRotation = noiseRotation;
+
+//Added variables for tracks
+let tracks = [];
+let trackButtons = [];
+let micButton;
+let currentPlayer = null;
+let trackFiles = [
+  "songs/blue.mp3",
+  "songs/black_white.mp3",
+  "songs/psy.mp3",
+];
 
 // Creation of shooting star class
 class ShootingStar {
@@ -134,12 +145,98 @@ function setup() {
   // Create 2D layer for background shooting stars
   backGroundLayer = createGraphics(innerWidth, innerHeight);
   for (let i = 0; i < starCount; i++) stars.push(new ShootingStar());
+
+  // === Audio setup (Tone.js players for tracks) ===
+  if (typeof Tone !== "undefined") {
+    for (let i = 0; i < trackFiles.length; i++) {
+      let player = new Tone.Player(trackFiles[i]).toDestination();
+      tracks.push(player);
+    }
+  }
+
+  // Play buttons
+  for (let i = 0; i < trackFiles.length; i++) {
+    let btn = createButton("Play Track " + (i + 1));
+    btn.position(20, height - 40 * (trackFiles.length - i));
+    btn.mousePressed(() => playTrack(i));
+    styleButton(btn);
+    trackButtons.push(btn);
+  }
+
+  // Microphone button
+  micButton = createButton("🎤 Microphone Input");
+  micButton.position(20, height - 40 * (trackFiles.length + 1));
+  micButton.mousePressed(startMic);
+  styleButton(micButton);
+}
+
+// Simple button styling helper
+function styleButton(btn) {
+  btn.style("background-color", "#111");
+  btn.style("color", "#fff");
+  btn.style("border", "1px solid #555");
+  btn.style("padding", "6px 10px");
+  btn.style("border-radius", "6px");
+  btn.style("font-family", "sans-serif");
+  btn.style("font-size", "14px");
+  btn.style("cursor", "pointer");
+  btn.mouseOver(() => btn.style("background-color", "#333"));
+  btn.mouseOut(() => btn.style("background-color", "#111"));
+}
+
+// Function to play selected track
+function playTrack(index) {
+  Tone.start();
+  stopAllAudio();
+  currentPlayer = tracks[index];
+  currentPlayer.start();
+  setupMeter(currentPlayer);
+}
+
+// Function to start microphone
+function startMic() {
+  Tone.start()
+    .then(() => {
+      stopAllAudio();
+      mic = new Tone.UserMedia();
+      return mic.open();
+    })
+    .then(() => {
+      setupMeter(mic);
+      audioOn = true;
+      console.log("Microphone started");
+    })
+    .catch((e) => console.error("Could not start microphone:", e));
+}
+
+// Helper to attach a meter to any source
+function setupMeter(source) {
+  meter = new Tone.Meter({
+    channels: 1,
+    normalRange: true,
+    smoothing: 0.8,
+  });
+  source.connect(meter);
+  audioOn = true;
+}
+
+// Stop all audio sources
+function stopAllAudio() {
+  audioOn = false;
+  if (currentPlayer) currentPlayer.stop();
+  if (mic && mic.state === "started") mic.close();
 }
 
 // Resizing the canvas depending on the size of the browser window
 function windowResized() {
   resizeCanvas(innerWidth, innerHeight);
   backGroundLayer.resizeCanvas(innerWidth, innerHeight);
+
+  // reposition buttons after resize
+  for (let i = 0; i < trackButtons.length; i++) {
+    trackButtons[i].position(20, height - 40 * (trackButtons.length - i));
+  }
+  micButton.position(20, height - 40 * (trackFiles.length + 1));
 }
 
 // Generates a sphere-mesh using vertices and triangle indices
@@ -250,27 +347,5 @@ function mousePressed() {
       currentColor[2],
       random(150, 220)
     );
-  }
-
-  // Start microphone
-  if (!audioOn && typeof Tone !== "undefined") {
-    Tone.start()
-      .then(() => {
-        mic = new Tone.UserMedia();
-        return mic.open();
-      })
-      .then(() => {
-        meter = new Tone.Meter({
-          channels: 1,
-          normalRange: true,
-          smoothing: 0.8,
-        });
-        mic.connect(meter);
-        audioOn = true;
-        console.log("Microphone started");
-      })
-      .catch((e) => {
-        console.error("Could not start microphone:", e);
-      });
   }
 }
