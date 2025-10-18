@@ -23,9 +23,9 @@ let indices = []; // Storing the triangles
 
 // Creating a Smooth noise pattern
 let noiseOffset = 0;
-let noiseScale = 0.7;      
-let noiseStrength = 10;    
-let noiseSpeed = 0.3;     
+let noiseScale = 0.7;
+let noiseStrength = 10;
+let noiseSpeed = 0.3;
 let noiseRotation = 0.0015;
 
 let rotationX = -0.4;
@@ -55,16 +55,12 @@ const _baseRadius = radius;
 const _baseNoiseSpeed = noiseSpeed;
 const _baseNoiseRotation = noiseRotation;
 
-//Added variables for tracks
+// Added variables for tracks
 let tracks = [];
 let trackButtons = [];
 let micButton;
 let currentPlayer = null;
-let trackFiles = [
-  "songs/blue.mp3",
-  "songs/black_white.mp3",
-  "songs/psy.mp3",
-];
+let trackFiles = ["songs/blue.mp3", "songs/black_white.mp3", "songs/psy.mp3"];
 
 // Creation of shooting star class
 class ShootingStar {
@@ -76,10 +72,19 @@ class ShootingStar {
   reset() {
     let side = floor(random(4));
     let x, y;
-    if (side === 0) { x = random(width); y = -20; }
-    else if (side === 1) { x = width + 20; y = random(height); }
-    else if (side === 2) { x = random(width); y = height + 20; }
-    else { x = -20; y = random(height); }
+    if (side === 0) {
+      x = random(width);
+      y = -20;
+    } else if (side === 1) {
+      x = width + 20;
+      y = random(height);
+    } else if (side === 2) {
+      x = random(width);
+      y = height + 20;
+    } else {
+      x = -20;
+      y = random(height);
+    }
 
     this.pos = createVector(x, y);
 
@@ -104,25 +109,27 @@ class ShootingStar {
   update() {
     this.prevPos = this.pos.copy();
 
-    //Gravity towards the orb affecting the particles
-    let orbScreen = createVector(width / 2, height / 2); //Center of the orb
+    // Gravity towards the orb affecting the particles
+    let orbScreen = createVector(width / 2, height / 2); // Center of the orb
     let dir = p5.Vector.sub(orbScreen, this.pos);
     let d = dir.mag();
-    if (d < 300) { 
+    if (d < 300) {
       dir.normalize();
-      let forceMag = gravityStrength / (d * d + 1000); //Gravity strength
+      let forceMag = gravityStrength / (d * d + 1000); // Gravity strength
       let pull = dir.mult(forceMag);
       this.vel.add(pull);
-      this.vel.limit(4); //Limit max speed
+      this.vel.limit(4); // Max speed limit
     }
 
     this.pos.add(this.vel);
     this.life--;
 
-    // Reset if offscreen or expired
+    // Reset positions of orbs if they go offscreen or if they expire
     if (
-      this.pos.x < -100 || this.pos.x > width + 100 ||
-      this.pos.y < -100 || this.pos.y > height + 100 ||
+      this.pos.x < -100 ||
+      this.pos.x > width + 100 ||
+      this.pos.y < -100 ||
+      this.pos.y > height + 100 ||
       this.life <= 0
     ) {
       this.reset();
@@ -146,7 +153,7 @@ function setup() {
   backGroundLayer = createGraphics(innerWidth, innerHeight);
   for (let i = 0; i < starCount; i++) stars.push(new ShootingStar());
 
-  //Audio setup (Tone.js players for tracks)
+  // Audio setup (Tone.js players for tracks)
   if (typeof Tone !== "undefined") {
     for (let i = 0; i < trackFiles.length; i++) {
       let player = new Tone.Player(trackFiles[i]).toDestination();
@@ -276,8 +283,8 @@ function draw() {
 
   // Render background layer behind the orb
   push();
-  translate(0, 0, -500); //Move plane behind the orb
-  texture(backGroundLayer); //Aplly the shooting stars layer
+  translate(0, 0, -500); // Moving the stars to sit behind the orb
+  texture(backGroundLayer); // Apllying the shooting stars layer
   noStroke();
   plane(width * 2, height * 2);
   pop();
@@ -294,10 +301,10 @@ function draw() {
   }
 
   // Map level to orb parameters
-  const _warpStrength = _baseNoiseStrength + audioLevel * 110; // higher = more
-  const _radiusBoost = audioLevel * 35; // slight puffing
-  const _speedBoost = audioLevel * 0.9; // faster surface motion
-  const _rotBoost = audioLevel * 0.02; // a bit more spin
+  const _warpStrength = _baseNoiseStrength + audioLevel * 110; // Higher = more
+  const _radiusBoost = audioLevel * 35; // // Audilevel increases size
+  const _speedBoost = audioLevel * 0.9; // Audiolevel increases vibration
+  const _rotBoost = audioLevel * 0.02; // Audiolevel increases spin
 
   noiseStrength = _warpStrength;
   radius = _baseRadius + _radiusBoost;
@@ -306,7 +313,7 @@ function draw() {
 
   // Floating + bouncing effect
   let floatY = sin(millis() * 0.002) * 10; // 10 pixels = speed
-  let bounce = sin(millis() * 0.003) * 6;  // smooth pulsating bounce
+  let bounce = sin(millis() * 0.003) * 6; // Smooth pulsating bounce up and down
   radius += bounce;
   translate(0, floatY, cameraDistance);
 
