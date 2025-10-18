@@ -105,15 +105,15 @@ class ShootingStar {
     this.prevPos = this.pos.copy();
 
     //Gravity towards the orb affecting the particles
-    let orbScreen = createVector(width / 2, height / 2);
+    let orbScreen = createVector(width / 2, height / 2); //Center of the orb
     let dir = p5.Vector.sub(orbScreen, this.pos);
     let d = dir.mag();
     if (d < 300) { 
       dir.normalize();
-      let forceMag = gravityStrength / (d * d + 1000);
+      let forceMag = gravityStrength / (d * d + 1000); //Gravity strength
       let pull = dir.mult(forceMag);
       this.vel.add(pull);
-      this.vel.limit(4);
+      this.vel.limit(4); //Limit max speed
     }
 
     this.pos.add(this.vel);
@@ -170,7 +170,7 @@ function setup() {
   styleButton(micButton);
 }
 
-// Simple button styling helper
+// Create simple button
 function styleButton(btn) {
   btn.style("background-color", "#111");
   btn.style("color", "#fff");
@@ -276,8 +276,8 @@ function draw() {
 
   // Render background layer behind the orb
   push();
-  translate(0, 0, -500);
-  texture(backGroundLayer);
+  translate(0, 0, -500); //Move plane behind the orb
+  texture(backGroundLayer); //Aplly the shooting stars layer
   noStroke();
   plane(width * 2, height * 2);
   pop();
